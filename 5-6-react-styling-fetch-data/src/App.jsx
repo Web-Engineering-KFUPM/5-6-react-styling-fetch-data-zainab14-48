@@ -32,8 +32,8 @@ LAB SETUP INSTRUCTIONS
 5. Link Bootstrap CSS to your React project:
    Open the file: public/index.html
    Inside the <head> tag, add this line:
-      <link 
-         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+      <link
+         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
          rel="stylesheet"
       >
 
@@ -117,17 +117,6 @@ Implement:
 - Button text MUST be: "View Details"
 - On click, it MUST call onUserClick and pass the current user object
 
-Hint:
-- You already have access to both props: user and onUserClick.
-- Your onClick must be a function (do NOT call onUserClick immediately).
-   Inside <Card.Body> (below <Card.Text>), add something like:
-   <Button
-   // onClick should call the handler and pass the current user
-   onClick={ TODO: write a function here }
-   >
-   { TODO: put the exact text here }
-   </Button>
-
 TODO 3.2 -  File: src/components/UserModal.jsx
 Implement:
 - Replace placeholder with a React-Bootstrap <Modal>
@@ -137,41 +126,6 @@ Implement:
   - Large avatar: first letter of user name (CSS class "user-avatar-large")
   - Name, Email, Phone, Website (each in its own <p>)
 - Footer MUST have ONE Close button that triggers onHide
-
-Hint:
-- Use Modal subcomponents: Header/Title/Body/Footer.
-- For the avatar, use user.name.charAt(0) and the className "user-avatar-large".
-- The close button should call onHide when clicked.
-   <Modal
-   show={ TODO: use the prop }
-   onHide={ TODO: use the prop }
-   >
-   <Modal.Header closeButton>
-      <Modal.Title>
-         { TODO: exact title text }
-      </Modal.Title>
-   </Modal.Header>
-
-   <Modal.Body>
-      <div className="user-avatar-large">
-         { TODO: first character of user name }
-      </div>
-
-      <p><strong>Name:</strong> { TODO }</p>
-      <p><strong>Email:</strong> { TODO }</p>
-      <p><strong>Phone:</strong> { TODO }</p>
-      <p><strong>Website:</strong> { TODO }</p>
-   </Modal.Body>
-
-   <Modal.Footer>
-      <Button
-         variant="secondary"
-         onClick={ TODO: call the close handler }
-      >
-         Close
-      </Button>
-   </Modal.Footer>
-   </Modal>
 
 ===================================================================
 END OF LAB INSTRUCTIONS
@@ -203,7 +157,27 @@ export default function App() {
      Implement fetch logic inside this useEffect.
      ========================================================= */
   useEffect(() => {
-    // TODO 2.1: Implement fetching users here (see lab instructions)
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch("https://jsonplaceholder.typicode.com/users");
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setUsers(data);
+        setFilteredUsers(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   /* =========================================================
@@ -214,7 +188,14 @@ export default function App() {
      Dependency array MUST be: [searchTerm, users]
      ========================================================= */
   useEffect(() => {
-    // TODO 2.2: Implement filtering users here (see lab instructions)
+    if (!searchTerm) {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter((user) =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
   }, [searchTerm, users]);
 
   // Modal handlers (already complete)
@@ -231,7 +212,7 @@ export default function App() {
   return (
     <div className="app">
       {/* TODO 1.1: Set header className EXACTLY as in lab instructions */}
-      <header className="">
+      <header className="bg-primary text-white py-3 mb-4 shadow">
         <Container>
           <h1 className="h2 mb-0">User Management Dashboard</h1>
           <p className="mb-0 opacity-75">Search users and view details</p>
@@ -254,7 +235,7 @@ export default function App() {
       </Container>
 
       {/* TODO 1.1: Set footer className EXACTLY as in lab instructions */}
-      <footer className="">
+      <footer className="bg-light py-4 mt-5">
         <Container>
           <small className="text-muted">SWE 363 — React Lab</small>
         </Container>
